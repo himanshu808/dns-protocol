@@ -3,6 +3,7 @@
 #include <vector>
 #include "BytePacketBuffer.hpp"
 #include "DnsPacket.hpp"
+#include "UDPClient.hpp"
 
 void readFile(std::string &fileName, BytePacketBuffer &buffer) {
     std::ifstream file(fileName, std::ios::binary);
@@ -11,31 +12,32 @@ void readFile(std::string &fileName, BytePacketBuffer &buffer) {
 
 
 int main(int argc, const char **argv) {
+    std::string domain = "google.com.";
+    QueryType qtype = QueryType::A;
 
-    if (argc != 2) {
-        std::cout << "Usage: <executable-name> <path-do-dns-resp-packet>";
-        return 0;
-    }
+    std::string servaddr = "8.8.8.8";
+    int servport = 53;  // DNS UDP port
 
-    BytePacketBuffer buffer;
-    std::string fileName = argv[1];
-    readFile(fileName, buffer);
-
+    UDPClient udp(servaddr, servport);
     DnsPacket packet;
-    packet.packetFromBuffer(buffer);
-    std::cout << packet.header << std::endl;
 
-    for (const auto& q: packet.questions) std::cout << q;
-    std::cout << std::endl;
+    packet.header.pid = 1234;
+    packet.header.questions = 1;
+    packet.header.recursionDesired = true;
+    DnsQuestion ques(domain, qtype);
+    packet.questions.push_back(ques);
 
-    for (const auto& q: packet.answers) std::cout << q;
-    std::cout << std::endl;
+    BytePacketBuffer reqbuffer;
+    packet.write(reqbuffer);
+    std::cout << "Bytes sent: " << udp.send(reqbuffer) << std::endl;
 
-    for (const auto& q: packet.authorities) std::cout << q;
-    std::cout << std::endl;
+    BytePacketBuffer resbuffer;
+    std::cout << "Bytes received: " << udp.recv(resbuffer) << std::endl;
 
-    for (const auto& q: packet.resources) std::cout << q;
-    std::cout << std::endl;
+    DnsPacket respacket;
+    respacket.packetFromBuffer(resbuffer);
+
+    std::cout << respacket << std::endl;
 
     return 0;
 }
