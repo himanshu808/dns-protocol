@@ -9,6 +9,7 @@ add_executable(
         dns_protocol
         main.cpp
         BytePacketBuffer.cpp
+        UDPClient.cpp
         DnsHeader.cpp
         DnsQuestion.cpp
         DnsAnswer.cpp

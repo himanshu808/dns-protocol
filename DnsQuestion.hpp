@@ -7,7 +7,7 @@
 #include "Utils.hpp"
 
 
-enum QueryType {
+enum QueryType: uint16_t {
     UNKNOWN,    // 0
     A           // 1
 };
@@ -22,6 +22,7 @@ public:
     DnsQuestion(std::string n, QueryType qt) : name(std::move(n)), qType(qt) {}
     void read(BytePacketBuffer &buffer);
     friend std::ostream &operator<<(std::ostream &os, const DnsQuestion &question);
+    void write(BytePacketBuffer &buffer) const;
 };
 
 #endif

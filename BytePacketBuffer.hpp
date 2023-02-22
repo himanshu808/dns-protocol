@@ -27,6 +27,10 @@ public:
     void readDomainName(std::string &domain);
     void validatePos(unsigned position);
     [[ noreturn ]] void raiseError();
+    void write1Byte(uint8_t val);
+    void write2Bytes(uint16_t val);
+    void write4Bytes(uint32_t val);
+    void writeDomainName(const std::string &domain);
 };
 
 #endif

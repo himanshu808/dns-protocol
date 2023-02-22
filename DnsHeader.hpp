@@ -53,6 +53,7 @@ public:
         , resourceEntries(0) {}
 
     void read(BytePacketBuffer &buffer);
+    void write(BytePacketBuffer &buffer) const;
 
     friend std::ostream &operator<<(std::ostream &os, const DnsHeader &header);
 };

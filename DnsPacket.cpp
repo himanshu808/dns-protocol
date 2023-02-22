@@ -29,3 +29,35 @@ void DnsPacket::packetFromBuffer(BytePacketBuffer &buffer) {
     }
 
 }
+
+void DnsPacket::write(BytePacketBuffer &buffer) {
+    header.questions = questions.size();
+    header.answers = answers.size();
+    header.authoritativeEntries = authorities.size();
+    header.resourceEntries = resources.size();
+
+    header.write(buffer);
+
+    for (const auto & i : questions) i.write(buffer);
+    for (const auto & i : answers) i->write(buffer);
+    for (const auto & i : authorities) i->write(buffer);
+    for (const auto & i : resources) i->write(buffer);
+}
+
+std::ostream &operator<<(std::ostream &os, const DnsPacket &packet) {
+    os << packet.header << std::endl;
+
+    for (const auto& q: packet.questions) os << q;
+    os << std::endl;
+
+    for (const auto& q: packet.answers) os << q;
+    os << std::endl;
+
+    for (const auto& q: packet.authorities) os << q;
+    os << std::endl;
+
+    for (const auto& q: packet.resources) os << q;
+    os << std::endl;
+
+    return os;
+}

@@ -6,6 +6,7 @@
 #include "DnsAnswer.hpp"
 #include "BytePacketBuffer.hpp"
 #include <vector>
+#include <iostream>
 
 class DnsPacket {
 public:
@@ -22,6 +23,9 @@ public:
 //        authorities = std::vector<DnsAnswer>();
 //    }
     void packetFromBuffer(BytePacketBuffer &buffer);
+    void write(BytePacketBuffer &buffer);
+
+    friend std::ostream& operator<< (std::ostream& os, const DnsPacket &packet);
 };
 
 #endif

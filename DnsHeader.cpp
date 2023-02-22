@@ -46,3 +46,27 @@ std::ostream &operator<<(std::ostream &os, const DnsHeader &header) {
               << "\tresourceEntries: " << header.resourceEntries << std::endl
               << "}" << std::endl;
 }
+
+void DnsHeader::write(BytePacketBuffer &buffer) const {
+    buffer.write2Bytes(pid);
+    buffer.write1Byte(
+    (recursionDesired
+            | (truncatedMsg << 1)
+            | (authoritativeAns << 2)
+            | (opcode << 3)
+            | (queryResponse << 7))
+    );
+
+    buffer.write1Byte(
+    (responseCode
+             | (checkingDisabled << 4)
+             | (authedData << 5)
+             | (Z << 6)
+             | (recursionAvailable << 7))
+    );
+
+    buffer.write2Bytes(questions);
+    buffer.write2Bytes(answers);
+    buffer.write2Bytes(authoritativeEntries);
+    buffer.write2Bytes(resourceEntries);
+}

@@ -80,3 +80,44 @@ void BytePacketBuffer::readDomainName(std::string &domain) {
     if (!jumped) seek(curr);
 }
 
+void BytePacketBuffer::write1Byte(uint8_t val) {
+    validatePos(pos);
+    buf[pos++] = val;
+}
+
+void BytePacketBuffer::write2Bytes(uint16_t val) {
+    write1Byte(static_cast<uint8_t>(val >> 8));
+    write1Byte(static_cast<uint8_t>(val & 0xFF));
+}
+
+void BytePacketBuffer::write4Bytes(uint32_t val) {
+    // TODO: try reusing write2Bytes()?
+    // TODO: do we need to & each time?
+    write1Byte(static_cast<uint8_t>(val >> 24) & 0xFF);
+    write1Byte(static_cast<uint8_t>(val >> 16) & 0xFF);
+    write1Byte(static_cast<uint8_t>(val >> 8) & 0xFF);
+    write1Byte(static_cast<uint8_t>(val & 0xFF));
+}
+
+void BytePacketBuffer::writeDomainName(const std::string &domain) {
+    size_t prev = 0;
+    size_t next = 0;
+    char delimiter = '.';
+    std::string label;
+    unsigned len;
+
+    while((next = domain.find(delimiter, prev)) != std::string::npos) {
+        label = domain.substr(prev, next-prev);
+        len = label.length();
+
+        if (len > 63) throw "Label exceeds 63 characters";
+        write1Byte(len);
+
+        for(const char& c: label) write1Byte(static_cast<uint8_t>(c));
+
+        prev = next + 1;
+    }
+    write1Byte(0);  // terminate using a 0 indicating the end of label
+
+}
+

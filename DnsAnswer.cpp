@@ -2,7 +2,7 @@
 #include <vector>
 #include <iostream>
 
-void DnsAnswer::constructIPAddr(uint32_t rawIP, std::string &addr) {
+void DnsAnswer::constructIPv4Addr(uint32_t rawIP, std::string &addr) {
     for (int i = 3; i >= 0 ; i--) {
         addr += std::to_string(static_cast<uint8_t>((rawIP >> (8*i)) & 0xFF)) + ".";
     }
@@ -22,7 +22,7 @@ DnsAnswer* DnsAnswer::read(BytePacketBuffer &buffer) {
     switch (queryType) {
         case QueryType::A : {
             rawIp = buffer.read4Bytes();
-            DnsAnswer::constructIPAddr(rawIp, addr);
+            DnsAnswer::constructIPv4Addr(rawIp, addr);
             return createDnsAns(domain, addr, ttl);
         }
         case QueryType::UNKNOWN : {
@@ -42,6 +42,28 @@ DnsAnswer* DnsAnswer::createDnsAns(std::string &domain, std::string &addr , uint
     return ans;
 }
 
+uint32_t DnsAnswer::deconstructIPv4Addr(const std::string &addr) {
+    char delimiter = '.';
+    size_t prev = 0;
+    size_t next = 0;
+    uint32_t res = 0;
+    unsigned i = 0;
+
+    while ((next = addr.find(delimiter,prev)) != std::string::npos) {
+        res = (res << (8 * i)) | static_cast<uint8_t>(strtol(addr.substr(prev, next-prev).c_str(),
+                                                             nullptr, 10));
+        i++;
+        prev = next + 1;
+    }
+    return res;
+}
+
+unsigned UnknownDnsAnswer::write(BytePacketBuffer &buffer) const {
+    std::cout << "Skipping record ..." << std::endl;
+    std::cout << this << std::endl;
+    return 0;
+}
+
 
 std::ostream& UnknownDnsAnswer::format(std::ostream &os) const {
     return os << "UnknownDnsAnswer {" << std::endl
@@ -57,4 +79,21 @@ std::ostream& ATypeDnsAnswer::format(std::ostream &os) const {
               << "\taddr: " << addr << std::endl
               << "\tttl: " << ttl << std::endl
               << "}" << std::endl;
+}
+
+unsigned ATypeDnsAnswer::write(BytePacketBuffer &buffer) const {
+    uint32_t ip;
+
+    unsigned start_pos = buffer.getPos();
+
+    buffer.writeDomainName(domain);
+    buffer.write2Bytes(idxFromEnum<QueryType>(QueryType::A));
+    buffer.write2Bytes(1);  // class is always set to 1
+    buffer.write4Bytes(ttl);
+    buffer.write2Bytes(4);  // setting data len to 4; because of ip addr?
+
+    ip = DnsAnswer::deconstructIPv4Addr(addr);
+    buffer.write4Bytes(ip );  // TODO: should work instead of 4 - 1 byte calls
+
+    return buffer.getPos() - start_pos;
 }
