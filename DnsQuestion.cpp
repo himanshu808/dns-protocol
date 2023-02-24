@@ -1,10 +1,11 @@
 #include "DnsQuestion.hpp"
 #include <iostream>
 
+uint16_t QueryType::qNum = 1;
 
 void DnsQuestion::read(BytePacketBuffer &buffer) {
     buffer.readDomainName(name);
-    qType = enumFromIdx<QueryType>(buffer.read2Bytes());
+    qType = QueryType::toEnum(buffer.read2Bytes());
     buffer.read2Bytes();
 }
 
@@ -17,6 +18,6 @@ std::ostream &operator<<(std::ostream &os, const DnsQuestion &question) {
 
 void DnsQuestion::write(BytePacketBuffer &buffer) const {
     buffer.writeDomainName(name);
-    buffer.write2Bytes(idxFromEnum<QueryType>(qType));
+    buffer.write2Bytes(QueryType::toNum(qType));
     buffer.write2Bytes(1);  // class is always set to 1
 }

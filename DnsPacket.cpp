@@ -5,27 +5,29 @@ void DnsPacket::packetFromBuffer(BytePacketBuffer &buffer) {
     header.read(buffer);
 
     unsigned i;
-    DnsAnswer* answer;
 
     for (i = 0; i < header.questions; i++) {
-        DnsQuestion question("", QueryType::UNKNOWN);
+        DnsQuestion question("", QueryType::QueryTypeEnum::UNKNOWN);
         question.read(buffer);
         questions.push_back(question);
     }
 
     for (i = 0; i < header.answers; i++) {
+        DnsAnswer* answer;
         answer = DnsAnswer::read(buffer);
         answers.push_back(answer);
     }
 
     for (i = 0; i < header.authoritativeEntries; i++) {
-        answer = DnsAnswer::read(buffer);
-        authorities.push_back(answer);
+        DnsAnswer* authAns;
+        authAns = DnsAnswer::read(buffer);
+        authorities.push_back(authAns);
     }
 
     for (i = 0; i < header.resourceEntries; i++) {
-        answer = DnsAnswer::read(buffer);
-        resources.push_back(answer);
+        DnsAnswer* resAns;
+        resAns = DnsAnswer::read(buffer);
+        resources.push_back(resAns);
     }
 
 }

@@ -31,6 +31,8 @@ public:
     void write2Bytes(uint16_t val);
     void write4Bytes(uint32_t val);
     void writeDomainName(const std::string &domain);
+    void set1Byte(unsigned position, uint8_t val);
+    void set2Bytes(unsigned position, uint16_t val);
 };
 
 #endif

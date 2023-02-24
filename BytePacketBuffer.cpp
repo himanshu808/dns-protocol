@@ -121,3 +121,13 @@ void BytePacketBuffer::writeDomainName(const std::string &domain) {
 
 }
 
+void BytePacketBuffer::set1Byte(unsigned int position, uint8_t val) {
+    validatePos(position);
+    buf[position] = val;
+}
+
+void BytePacketBuffer::set2Bytes(unsigned int position, uint16_t val) {
+    set1Byte(position, static_cast<uint8_t>(val >> 8));
+    set1Byte(position + 1, static_cast<uint8_t>(val & 0xFF));
+}
+
