@@ -58,7 +58,7 @@ DnsAnswer* DnsAnswer::read(BytePacketBuffer &buffer) {
             buffer.readDomainName(addr);
             return createDnsAns(domain, priority, addr, ttl);
         }
-        case QueryType::QueryTypeEnum::UNKNOWN : {
+        default : {
             buffer.step(dataLen);
             return createDnsAns(domain, queryType, dataLen, ttl);
         }

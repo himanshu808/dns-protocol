@@ -12,10 +12,26 @@ void readFile(std::string &fileName, BytePacketBuffer &buffer) {
 
 
 int main(int argc, const char **argv) {
-    std::string domain = "google.com.";
-    QueryType qtype = QueryType::A;
+    if (argc != 4) {
+        std::cout << "Usage: <executable-name> <lookup-domain> <record-type> <dns-resolver-ip>" << std::endl;
+        return 0;
+    } else {
+        std::string recordType = std::string(argv[2]);
+        if (!std::all_of(recordType.begin(), recordType.end(), ::isdigit)) {
+            std::cout << "<record-type> should only contain digits" << std::endl;
+            return 0;
+        }
+    };
 
-    std::string servaddr = "8.8.8.8";
+
+    QueryType::QueryTypeEnum qtype = QueryType::toEnum(std::stoi(argv[2]));
+    if (qtype == QueryType::QueryTypeEnum::UNKNOWN) {
+        std::cout << "<record-type> can be either 1, 2, 5, 15, 28" << std::endl;
+        return 0;
+    }
+    std::string domain = std::string(argv[1]) + ".";
+
+    std::string servaddr = std::string(argv[3]);
     int servport = 53;  // DNS UDP port
 
     UDPClient udp(servaddr, servport);
