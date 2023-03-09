@@ -16,12 +16,6 @@ public:
     std::vector<DnsAnswer*> resources;
     std::vector<DnsAnswer*> authorities;
 
-//    DnsPacket() {
-//        questions = std::vector<DnsQuestion>();
-//        answers = std::vector<DnsAnswer>();
-//        resources = std::vector<DnsAnswer>();
-//        authorities = std::vector<DnsAnswer>();
-//    }
     void packetFromBuffer(BytePacketBuffer &buffer);
     void write(BytePacketBuffer &buffer);
 

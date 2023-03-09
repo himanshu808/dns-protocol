@@ -12,19 +12,16 @@
 
 class UDPClient {
 public:
-    UDPClient(const std::string& addr, int port);
+    UDPClient();
     ~UDPClient();
 
-    ssize_t send(const BytePacketBuffer &buffer);
-    ssize_t recv(BytePacketBuffer &buffer);
+    ssize_t send(const BytePacketBuffer &buffer, std::string &sendToAddr, int sendToPort);
+    std::pair<ssize_t, std::pair<std::string, int>> recv(BytePacketBuffer &buffer);
+    void bind(std::string &addr, int port);
 
 
 private:
     int udpSocket;
-    int servPort;
-    std::string servIP;
-    struct sockaddr_in servAddr, clAddr;
-    socklen_t servLen, clLen;
 };
 
 

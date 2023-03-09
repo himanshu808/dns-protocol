@@ -106,8 +106,10 @@ void BytePacketBuffer::writeDomainName(const std::string &domain) {
     std::string label;
     unsigned len;
 
-    while((next = domain.find(delimiter, prev)) != std::string::npos) {
-        label = domain.substr(prev, next-prev);
+    std::string tempDomain = domain + ".";
+
+    while((next = tempDomain.find(delimiter, prev)) != std::string::npos) {
+        label = tempDomain.substr(prev, next-prev);
         len = label.length();
 
         if (len > 63) throw "Label exceeds 63 characters";

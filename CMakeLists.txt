@@ -14,4 +14,5 @@ add_executable(
         DnsQuestion.cpp
         DnsAnswer.cpp
         DnsPacket.cpp
+        DNSProxy.cpp
 )

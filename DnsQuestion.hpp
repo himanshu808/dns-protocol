@@ -58,6 +58,8 @@ public:
     void read(BytePacketBuffer &buffer);
     friend std::ostream &operator<<(std::ostream &os, const DnsQuestion &question);
     void write(BytePacketBuffer &buffer) const;
+    [[nodiscard]] std::string getDomainName() const { return name; }
+    [[nodiscard]] QueryType::QueryTypeEnum getQueryType() const { return qType; }
 };
 
 #endif
