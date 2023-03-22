@@ -57,6 +57,8 @@ public:
 //    friend std::ostream& operator<<(std::ostream &os, const ATypeDnsAnswer &answer);
     std::ostream& format(std::ostream &os) const override;
     unsigned write(BytePacketBuffer &buffer) const override;
+    [[nodiscard]] std::string getIPAddr() const { return addr; }
+    [[nodiscard]] std::string getDomain() const { return domain; }
 };
 
 class NSTypeDnsAnswer : public DnsAnswer {
@@ -73,6 +75,8 @@ public:
 
     std::ostream& format(std::ostream &os) const override;
     unsigned write(BytePacketBuffer &buffer) const override;
+    [[nodiscard]] std::string getDomain() const { return domain; }
+    [[nodiscard]] std::string getHost() const { return host; }
 };
 
 class CNameTypeDnsAnswer : public DnsAnswer {

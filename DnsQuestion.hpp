@@ -55,6 +55,11 @@ private:
 
 public:
     DnsQuestion(std::string n, QueryType::QueryTypeEnum qt) : name(std::move(n)), qType(qt) {}
+    DnsQuestion(const DnsQuestion &q) {
+        name = q.name;
+        qType = q.qType;
+    }
+
     void read(BytePacketBuffer &buffer);
     friend std::ostream &operator<<(std::ostream &os, const DnsQuestion &question);
     void write(BytePacketBuffer &buffer) const;

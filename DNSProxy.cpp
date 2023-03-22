@@ -1,4 +1,5 @@
 #include "DNSProxy.hpp"
+#include <fstream>
 
 bool DNSProxy::validateInput(std::string &recordType, QueryType::QueryTypeEnum qtype) {
     if (!std::all_of(recordType.begin(), recordType.end(), ::isdigit)) {
@@ -14,18 +15,18 @@ bool DNSProxy::validateInput(std::string &recordType, QueryType::QueryTypeEnum q
     return true;
 }
 
-DnsPacket DNSProxy::performLookup(std::string &domain, QueryType::QueryTypeEnum qtype) {
+DnsPacket DNSProxy::performLookup(std::string &domain, QueryType::QueryTypeEnum qtype, std::string &serverIP) {
     int servport = 53;  // DNS UDP port
-    std::string servaddr = "8.8.8.8";
+    std::string servaddr = serverIP;
 
     UDPClient udp;
     std::string bindAddr = "0.0.0.0";
-    udp.bind(bindAddr, 8989);
+    udp.bind(bindAddr, 43210);
     DnsPacket packet;
 
-    packet.header.pid = 1234 ;
+    packet.header.pid = 45769;
     packet.header.questions = 1;
-    packet.header.recursionDesired = true;
+    packet.header.authedData = true;
     DnsQuestion ques(domain, qtype);
     packet.questions.push_back(ques);
 
@@ -69,7 +70,7 @@ void DNSProxy::handleRequest(UDPClient &udpSocket) {
         std::cout << "Client query: " << question << std::endl;
 
         std::string domain = question.getDomainName();
-        DnsPacket lookupPacket = performLookup(domain, question.getQueryType());
+        DnsPacket lookupPacket = recursiveResolve(domain, question.getQueryType());
 
         if (lookupPacket.header.responseCode == RCode::NOERROR) {
             proxyPacket.questions.push_back(question);
@@ -101,10 +102,46 @@ void DNSProxy::handleRequest(UDPClient &udpSocket) {
     BytePacketBuffer responseBuffer;
     proxyPacket.write(responseBuffer);
 
+    std::cout << "Proxy packet:\n" << proxyPacket << std::endl;
+
     std::cout << "Forwarding response to client...\nBytes sent: " << udpSocket.send(responseBuffer,
                                                                                     source.second.first,
                                                                                     source.second.second)
                                                                                     << std::endl;
+}
+
+DnsPacket DNSProxy::recursiveResolve(std::string &domain, QueryType::QueryTypeEnum qtype) {
+    std::string nsIP = "198.41.0.4";
+    std::string tempIP;
+    std::string newNSName;
+
+    while(true) {
+        std::cout << "Performing lookup of qtype: " << qtype << " domain: " << domain
+                                                    << " with ns: " << nsIP << std::endl;
+
+        std::string serverIP = nsIP;
+        DnsPacket response = performLookup(domain, qtype, serverIP);
+        if (!response.answers.empty() && (response.header.responseCode == RCode::NOERROR ||
+                                            response.header.responseCode == RCode::NXDOMAIN)) return response;
+
+
+        tempIP = response.getResolvedNS(domain);
+        if (!tempIP.empty()){
+            nsIP = tempIP;
+            continue;
+        }
+
+        newNSName = response.getUnresolvedNS(domain);
+        if (newNSName.empty()) {
+            return response;
+        }
+
+        DnsPacket recursiveResponse = recursiveResolve(newNSName, QueryType::QueryTypeEnum::A);
+
+        tempIP = recursiveResponse.getRandomARecord();
+        if (!tempIP.empty()) nsIP = tempIP;
+        else return response;
+    }
 }
 
 

@@ -7,6 +7,7 @@ include_directories(.)
 
 add_executable(
         dns_protocol
+        Utils.cpp
         main.cpp
         BytePacketBuffer.cpp
         UDPClient.cpp

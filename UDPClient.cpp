@@ -22,7 +22,7 @@ ssize_t UDPClient::send(const BytePacketBuffer &buffer, std::string &sendToAddr,
     sendAddr.sin_port = htons(sendToPort);
     sendAddr.sin_addr.s_addr = inet_addr(sendToAddr.c_str());
 
-    return sendto(udpSocket, buffer.buf, sizeof(buffer.buf), 0, (struct sockaddr *)&sendAddr, sizeof(sendAddr));
+    return sendto(udpSocket, buffer.buf, buffer.getPos(), 0, (struct sockaddr *)&sendAddr, sizeof(sendAddr));
 }
 
 std::pair<ssize_t, std::pair<std::string, int>> UDPClient::recv(BytePacketBuffer &buffer) {

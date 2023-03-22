@@ -16,7 +16,7 @@ public:
     uint8_t buf[512];  // TODO: do we always require a buffer of size 512?
     BytePacketBuffer() : pos(0), buf() {}
 
-    unsigned getPos();
+    unsigned getPos() const;
     void step(unsigned steps);
     void seek(unsigned position);
     uint8_t read();

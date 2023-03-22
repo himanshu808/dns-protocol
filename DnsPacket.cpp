@@ -63,3 +63,49 @@ std::ostream &operator<<(std::ostream &os, const DnsPacket &packet) {
 
     return os;
 }
+
+std::string DnsPacket::getRandomARecord() {
+    for (const auto& q: answers) {
+        auto *ans = dynamic_cast<ATypeDnsAnswer*>(q);
+        if (ans == nullptr) continue;
+        else {
+            return ans->getIPAddr();
+        }
+    }
+    return "";
+}
+
+std::vector<std::pair<std::string, std::string>> DnsPacket::getAllNameServers(const std::string &domainName) {
+    std::vector<std::pair<std::string, std::string>> ns;
+    for (const auto& q: authorities) {
+        auto *ans = dynamic_cast<NSTypeDnsAnswer*>(q);
+        if (ans == nullptr) continue;
+        else {
+            std::string domain = ans->getDomain();
+            if (!hasEnding(domainName, domain)) continue;
+            ns.emplace_back(domain, ans->getHost());
+        }
+    }
+    return ns;
+}
+
+std::string DnsPacket::getResolvedNS(const std::string &domain) {
+    std::vector<std::pair<std::string, std::string>> nameServers = getAllNameServers(domain);
+    for (const auto& res: resources) {
+        auto *ans = dynamic_cast<ATypeDnsAnswer*>(res);
+        if (ans == nullptr) continue;
+        std::string domainName = ans->getDomain();
+        for (const auto& ns: nameServers) {
+            if (domainName == ns.second) {
+                return ans->getIPAddr();
+            }
+        }
+    }
+    return "";
+}
+
+std::string DnsPacket::getUnresolvedNS(const std::string &domain) {
+    std::vector<std::pair<std::string, std::string>> nameServers = getAllNameServers(domain);
+    if (!nameServers.empty()) return nameServers[0].second;
+    return "";
+}

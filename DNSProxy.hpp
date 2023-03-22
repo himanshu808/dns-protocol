@@ -11,7 +11,8 @@
 class DNSProxy {
 private:
     bool validateInput(std::string &recordType, QueryType::QueryTypeEnum qtype);
-    DnsPacket performLookup(std::string &domain, QueryType::QueryTypeEnum qtype);
+    DnsPacket performLookup(std::string &domain, QueryType::QueryTypeEnum qtype, std::string &serverIP);
+    DnsPacket recursiveResolve(std::string &domain, QueryType::QueryTypeEnum qtype);
 
 public:
     void handleRequest(UDPClient &udpSocket);

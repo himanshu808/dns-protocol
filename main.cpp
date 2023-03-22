@@ -19,6 +19,7 @@ int main(int argc, const char **argv) {
     udpClient.bind(addr, port);
     DNSProxy proxy;
 
+    std::cout << "Proxy server listening on " << port << "..." << std::endl;
     do {
         try{
             proxy.handleRequest(udpClient);

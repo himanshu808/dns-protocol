@@ -8,7 +8,7 @@ void BytePacketBuffer::validatePos(unsigned int position) {
     if (position >= 512) raiseError();
 }
 
-unsigned BytePacketBuffer::getPos() { return pos; }
+unsigned BytePacketBuffer::getPos() const { return pos; }
 
 void BytePacketBuffer::step(unsigned int steps) { pos += steps; }
 
